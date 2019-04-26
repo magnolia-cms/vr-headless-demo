@@ -308,6 +308,7 @@ function buildImage(s, z, block, entityEl){
     side: 'double',
     src : IMG_URL
   });
+  entityEl.setAttribute('crossorigin', 'Anonymous');
   console.log('image:' + img_url);
 }
 
@@ -325,6 +326,7 @@ function buildTour(s, z, block, entityEl){
     side: 'double',
     src : img_url
   });
+  entityEl.setAttribute('crossorigin', 'Anonymous');
 
   var m = {
     color: "#fff",
