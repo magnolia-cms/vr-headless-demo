@@ -1,0 +1,495 @@
+<html>
+
+<head>
+  <meta http-equiv="Content-Security-Policy" content="default-src *  data: blob: 'unsafe-inline' 'unsafe-eval';
+script-src * data: blob: 'unsafe-inline' 'unsafe-eval';
+connect-src * data: blob: 'unsafe-inline';
+img-src * data: blob: 'unsafe-inline';
+frame-src * data: blob: ;
+style-src * data: blob: 'unsafe-inline';
+font-src * data: blob: 'unsafe-inline';">
+
+  <script src="//aframe.io/releases/0.9.0/aframe.min.js"></script>
+  <script src="//unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v6.0.0/dist/aframe-extras.controls.min.js"></script>
+
+<!--
+<script src="https://rawgit.com/Ctrl-Alt-Zen/aframe-mobile-controls/master/components/twoway-motion/twoway-motion.js"></script>
+-->
+<script>
+
+//Running on locale
+  // var SERVER_URL = "http://localhost:8080/"
+  // var IMG_BASE_URL = "http://localhost:8080/"
+  // var BASE_URL = SERVER_URL + "magnoliaPublic/"
+  // var CONTENT_URL = BASE_URL + ".rest/delivery/stories/v1/";
+
+
+
+//Running on local CLOUD
+var SERVER_URL = "https://public-integration-magnolia-pm.de.magnolia-cloud.com/"
+var IMG_BASE_URL = "https://public-integration-magnolia-pm.de.magnolia-cloud.com/"
+var BASE_URL = SERVER_URL + "/"
+var CONTENT_URL = BASE_URL + ".rest/delivery/stories/v1/";
+
+
+
+
+  //var SERVER_URL = "https://demopublic.magnolia-cms.com/";
+  //var SERVER_URL = "http://192.168.10.15:8080/"
+
+  //var SERVER_URL = "https://magdemo.timecam.tv/"
+
+  //var IMG_BASE_URL = "https://magdemo.timecam.tv/"
+
+
+
+
+
+  //var BASE_URL = SERVER_URL + "magnoliaPublic/"
+
+
+  //.rest/delivery/stories/v1/stories-demo/lost-and-found-in-swiss-alps
+
+var Y = 1.6;
+var HEIGHT = 2;
+var WIDTH = 3;
+//Y=0;
+
+ const aSpace = [
+   {
+     pos:{   x:-3,  y:Y,   z:0},
+     rot:{   x: 0,    y:180, z:0},
+     width: WIDTH,
+     height: HEIGHT
+   },
+   {
+     pos:{   x:-4.5,  y:Y,   z:-1.5},
+     rot:{   x:0,     y:90,  z:0},
+     width: WIDTH,
+     height: HEIGHT
+   },
+   {
+     pos:{   x:-3,  y:Y,   z:-3},
+     rot:{   x:0,     y:0,  z:0},
+     width: WIDTH,
+     height: HEIGHT
+   },
+   {
+     pos:{   x:-1.5,  y:Y,   z:-4.5},
+     rot:{   x:0,     y:90,  z:0},
+     width: WIDTH,
+     height: HEIGHT
+   },
+
+
+   {
+     pos:{   x:3,  y:Y,   z:-3},
+     rot:{   x: 0,    y:180, z:0},
+     width: WIDTH,
+     height: HEIGHT
+   },
+   {
+     pos:{   x:4.5,  y:Y,   z:-4.5},
+     rot:{   x:0,     y:-90,  z:0},
+     width: WIDTH,
+     height: HEIGHT
+   },
+   {
+     pos:{   x:3,  y:Y,   z:-6},
+     rot:{   x:0,     y:0,  z:0},
+     width: WIDTH,
+     height: HEIGHT
+   },
+   {
+     pos:{   x:1.5,  y:Y,   z:-7.5},
+     rot:{   x:0,     y:-90,  z:0},
+     width: WIDTH,
+     height: HEIGHT
+   },
+
+
+ ]
+
+console.log("get data:" + CONTENT_URL)
+axios.get(CONTENT_URL)
+  .then(function (response) {
+    // handle success
+    console.log(response);
+    buildStoryScene(response.data.results);
+  })
+  .catch(function (error) {
+    // handle error
+    console.log(error);
+  })
+  .then(function () {
+    // always executed
+  });
+
+
+
+AFRAME.registerComponent('do-something-once-loaded', {
+  init: function () {
+    // This will be called after the entity has properly attached and loaded.
+    console.log('I am ready!');
+  }
+});
+
+var STORY_INDEX = 0;
+
+function buildScene(){
+  var sceneEl = document.querySelector('a-scene');
+  var entityEl = document.createElement('a-entity');
+  entityEl.setAttribute('do-something-once-loaded', '');
+  sceneEl.appendChild(entityEl);
+}
+
+function htmlToText(html){
+  var div = document.createElement("div");
+  div.innerHTML = html;
+  return div.innerText;
+}
+
+function buildStoryScene(stories){
+  var sceneEl = document.querySelector('a-scene');
+
+  renderTitle(stories[STORY_INDEX].title, sceneEl);
+  renderIntro(stories[STORY_INDEX], sceneEl);
+  renderAuthor(stories[STORY_INDEX], sceneEl);
+
+  var nodes = stories[STORY_INDEX]['@nodes']
+  var z = 0;
+  var index = 0;
+
+  nodes.forEach(function(nodeName) {
+    var block = stories[STORY_INDEX][nodeName];
+
+    var validItem = renderStoryItem(block, z, sceneEl, index)
+    if (validItem){
+      z -= 1;
+      index += 1;
+    }
+
+  });
+}
+
+function pad(m){
+
+  if (m.toString().length < 2){
+    return "0" + m;
+  }else {
+    return m;
+  }
+}
+
+
+function renderStoryItem(block, z, sceneEl, index){
+
+  var type = block['mgnl:type'];
+
+  console.log('renderStoryItem type:' + type );
+
+  var entityEl = document.createElement('a-entity');
+
+  entityEl.setAttribute('do-something-once-loaded', '');
+  var s = aSpace[(index % aSpace.length)];
+  var z = s.pos.z - Math.floor(index / aSpace.length) * 6;
+
+  entityEl.setAttribute('position', {x: s.pos.x, y: s.pos.y, z: z});
+  entityEl.setAttribute('rotation', {x: s.rot.x, y: s.rot.y, z: s.rot.z});
+
+  if (type == 'text'){
+
+      buildText(s, z, block, entityEl);
+
+    } else if (type === 'image'){
+
+      buildImage(s, z, block, entityEl);
+
+    }else  if (type === 'date'){
+
+      buildDate(s, z, block, entityEl);
+
+    }else if (type === 'tour'){
+
+      buildTour(s, z, block, entityEl);
+    //
+    // }else if (type === 'video'){
+    //
+    //   buildVideo(s, z, block, entityEl);
+
+    }else{
+      console.log('index:' + index + 'item type not supported:' + type);
+      return false;
+    }
+
+    sceneEl.appendChild(entityEl);
+
+    return true;
+
+}
+
+function setGeoPlane(entityEl, s){
+  entityEl.setAttribute('geometry', {
+    primitive: 'plane',
+    width: s.width,
+    height: s.height
+  });
+
+}
+
+
+function buildVideo(s, z, block, entityEl){
+
+  setGeoPlane(entityEl, s);
+  //VIMEO REQUIRES A SERVER - So we wont support it now.
+  var embed_url = block.embed;
+  embed_url = embed_url.slice('"')[2];
+  // console.log('img: ' + embed_url);
+  entityEl.setAttribute('material', {
+    shader: 'flat',
+    side: 'double',
+    src : "//localhost:8080/magnoliaPublic/.resources/vr-stories/webresources/demo-stories-zermatt_time-lapse-spiti-valley.mp4"
+  });
+  console.log('video:' + embed_url);
+}
+
+
+function buildText(s, z, block, entityEl){
+
+  setGeoPlane(entityEl, s);
+
+  var isHeader = (block['text'].indexOf('<h2>') > -1);
+  var text = htmlToText(block['text']);
+
+  if (isHeader){
+    entityEl.setAttribute('text', "side: front; color: white; align: center; wrap-count: 20; value: " + text);
+  }else{
+    entityEl.setAttribute('text', "side: front; color: white; value: " + text);
+  }
+  entityEl.setAttribute('material', {
+    color: "#111",
+    side: 'double',
+    shader: 'flat'
+  });
+  console.log(' text:' + text);
+}
+
+
+function buildDate(s, z, block, entityEl){
+
+  setGeoPlane(entityEl, s);
+  var date = htmlToText(block['date']);
+  var d = new Date(date);
+  var dateText = d.getDate() + '/' + (d.getMonth()+1) + '/' + d.getFullYear() + '\n ' + d.getHours() + ':' + pad(d.getMinutes());
+
+  entityEl.setAttribute('text', "align: center; wrap-count: 10; side: front; color: black; value: " + dateText);
+
+  entityEl.setAttribute('material', {
+    color: "#fff",
+    side: 'double',
+    shader: 'flat'
+  });
+  console.log('date:' + date + ' dt:' + dateText);
+}
+
+
+function buildImage(s, z, block, entityEl){
+
+  setGeoPlane(entityEl, s);
+
+  var IMG_URL;
+  var img_url = block['image']['renditions']['960']['link'];
+  console.log('img: ' + img_url);
+  IMG_URL = IMG_BASE_URL + img_url;
+
+  entityEl.setAttribute('material', {
+    shader: 'flat',
+    side: 'double',
+    src : IMG_URL
+  });
+  console.log('image:' + img_url);
+}
+
+
+function buildTour(s, z, block, entityEl){
+
+  var img_url = BASE_URL + ".resources/vr-stories/webresources/PANO_scott-wood-grand-teton.jpg"
+  entityEl.setAttribute('geometry', {
+    primitive: 'sphere',
+    height: 1.5,
+    width: 2
+  });
+  entityEl.setAttribute('material', {
+    shader: 'flat',
+    side: 'double',
+    src : img_url
+  });
+
+  var m = {
+    color: "#fff",
+    side: 'double',
+    shader: 'flat'
+  }
+
+  var sign = document.createElement('a-entity');
+  sign.setAttribute('position', {x: -0.7 , y: 0, z: 1.1});
+  entityEl.appendChild(sign);
+
+  var stand = document.createElement('a-entity');
+  var text = "TOUR";
+  stand.setAttribute('text', "side: front; color: black; align: right; wrap-count: 5; value: " + text);
+  stand.setAttribute('material', m);
+  stand.setAttribute('geometry', {
+    primitive: 'plane',
+    width: 0.8,
+    height: 0.5
+  });
+  stand.setAttribute('position', {x: 0 , y: -0.6, z: 0});
+  stand.setAttribute('rotation', {x: 0, y: 0, z: -90});
+  sign.appendChild(stand);
+
+  var plaque = document.createElement('a-entity');
+  var text = block.tour.name + '\n\n' + block.tour.description + '\n\n> ' + block.tour.location;
+  plaque.setAttribute('text', "side: front; color: black; wrap-count: 30; value: " + text);
+  plaque.setAttribute('material', m);
+  plaque.setAttribute('geometry', {
+    primitive: 'plane',
+    width: 0.5,
+    height: 0.3
+  });
+  plaque.setAttribute('position', {x: 0 , y: -0.2, z: 0});
+  plaque.setAttribute('rotation', {x: -45, y: 0, z: 0});
+  sign.appendChild(plaque);
+
+  var buybutton = document.createElement('a-entity');
+  var text = "BOOK TOUR"
+  buybutton.setAttribute('text', "side: front; color: white; wrap-count: 5; value: " + text);
+  buybutton.setAttribute('material', {
+    color: "#ef6155",
+    side: 'double',
+    shader: 'flat'
+  });
+  buybutton.setAttribute('geometry', {
+    primitive: 'plane',
+    width: 0.1,
+    height: 0.1
+  });
+  buybutton.setAttribute('position', {x: 0.2 , y: -0.075, z: 0.01});
+  plaque.appendChild(buybutton);
+
+}
+
+
+
+function renderTitle(text, sceneEl){
+  var entityEl = document.createElement('a-entity');
+  entityEl.setAttribute('text', "side: double; color: white; align: center; wrap-count: 20; value: " + text);
+  entityEl.setAttribute('material', {
+    color: "#f44",
+    side: 'double',
+    transparent: true,
+    opacity: 0.0,
+    shader: 'flat'
+  });
+  entityEl.setAttribute('position', {x: 0, y: 4, z: -3});
+  entityEl.setAttribute('rotation', {x: 0, y: 0, z: 0});
+  entityEl.setAttribute('geometry', {
+    primitive: 'plane',
+    width: 12,
+    height: 0.01
+  });
+  sceneEl.appendChild(entityEl);
+}
+
+
+
+
+function renderIntro(story, sceneEl){
+  var text = story.lead;
+  var entityEl = document.createElement('a-entity');
+  entityEl.setAttribute('text', "side: front; color: white; align: center; wrap-count: 30; value: " + text);
+  entityEl.setAttribute('material', {
+    color: "#000",
+    side: 'double',
+    shader: 'flat'
+  });
+  entityEl.setAttribute('position', {x: 2, y: 1, z: -1.5});
+  entityEl.setAttribute('rotation', {x: -45, y: -30, z: 0});
+  entityEl.setAttribute('geometry', {
+    primitive: 'plane',
+    width: 0.9,
+    height: 0.9
+  });
+  sceneEl.appendChild(entityEl);
+}
+
+function renderAuthor(story, sceneEl){
+
+  var text = story.author + '\n\n\n' + story.authorBio;
+  var entityEl = document.createElement('a-entity');
+  entityEl.setAttribute('text', "side: front; color: black; align: center; wrap-count: 30; value: " + text);
+  entityEl.setAttribute('material', {
+    color: "#fff",
+    side: 'double',
+    shader: 'flat'
+  });
+  entityEl.setAttribute('position', {x: 2.8, y: 1, z: -0.92});
+  entityEl.setAttribute('rotation', {x: -45, y: -30, z: 0});
+  entityEl.setAttribute('geometry', {
+    primitive: 'plane',
+    width: 0.9,
+    height: 0.9
+  });
+  sceneEl.appendChild(entityEl);
+}
+
+
+
+
+  </script>
+
+  <meta charset="utf-8">
+</head>
+
+<body>
+  <a-scene background="color: #444">
+
+    <a-plane id="floor" rotation="-90 0 0" position="0 0.6 -17" color="#222" height="40" width="9"></a-plane>
+
+
+    <a-assets>
+      <a-mixin id="marker" geometry="primitive: plane; width: 0.02; height: 0.02" material="color: red"></a-mixin>
+
+      <img id="test" crossorigin="anonymous" src="https://magdemo.timecam.tv//magnoliaPublic/.imaging/mte/travel-demo-theme/960/dam/stories-demo/found-in-switzerland/martin-sattler-120937/jcr:content/martin-sattler-120937.jpg">
+
+      <img id="test2" crossorigin="anonymous" src="https://magdemo.timecam.tv///magnoliaPublic/.imaging/mte/travel-demo-theme/960/dam/stories-demo/found-in-switzerland/hiker-joshua-earle-234844/jcr:content/hiker-joshua-earle-234844.jpg">
+    </a-assets>
+
+    <a-entity mixin="marker" position="0.0 0.0 +0.01"></a-entity>
+
+    <a-entity position="0.0 0 -0.1"
+      text="width: 0.1; color: white; side:double; value: START.; ">
+    </a-entity>
+
+    <a-entity id="rig"
+              movement-controls
+              position="0 0 1">
+      <a-entity camera
+                position="0 1.6 0"
+                controls="touch"
+                look-controls>
+              <!--
+        <a-entity cursor="fuse: true; fuseTimeout: 500"
+                  position="0 0 -1"
+                  geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
+                  material="color: black; shader: flat">
+        </a-entity>
+      -->
+      </a-entity>
+    </a-entity>
+
+  </a-scene>
+</body>
+
+</html>
