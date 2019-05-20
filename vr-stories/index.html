@@ -7,56 +7,34 @@ connect-src * data: blob: 'unsafe-inline';
 img-src * data: blob: 'unsafe-inline';
 frame-src * data: blob: ;
 style-src * data: blob: 'unsafe-inline';
-font-src * data: blob: 'unsafe-inline';">
+font-src * data: blob: 'unsafe-inline';"/>
+
+
+  <meta charset="utf-8"/>
 
   <script src="//aframe.io/releases/0.9.0/aframe.min.js"></script>
   <script src="//unpkg.com/axios/dist/axios.min.js"></script>
   <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v6.0.0/dist/aframe-extras.controls.min.js"></script>
 
-<!--
-<script src="https://rawgit.com/Ctrl-Alt-Zen/aframe-mobile-controls/master/components/twoway-motion/twoway-motion.js"></script>
--->
 <script>
 
-//Running on locale
-  // var SERVER_URL = "http://localhost:8080/"
-  // var IMG_BASE_URL = "http://localhost:8080/"
-  // var BASE_URL = SERVER_URL + "magnoliaPublic/"
-  // var CONTENT_URL = BASE_URL + ".rest/delivery/stories/v1/";
+//Running on local
+
+const SERVER_URL = "http://localhost:8080/"
+const IMG_BASE_URL = "http://localhost:8080/"
 
 
 
-//Running on local CLOUD
-var SERVER_URL = "https://public-integration-magnolia-pm.de.magnolia-cloud.com/"
-var IMG_BASE_URL = "https://public-integration-magnolia-pm.de.magnolia-cloud.com"
-var BASE_URL = SERVER_URL + ""
-var CONTENT_URL = BASE_URL + ".rest/delivery/stories/v1/";
+const BASE_URL = SERVER_URL + "magnoliaPublic/"
+const CONTENT_URL = BASE_URL + ".rest/delivery/storiesFull/v1/";
 
+const DEFAULT_STORY = "stories-demo/lost-and-found-in-swiss-alps";
 
+const Y = 1.6;
+const HEIGHT = 2;
+const WIDTH = 3;
 
-
-  //var SERVER_URL = "https://demopublic.magnolia-cms.com/";
-  //var SERVER_URL = "http://192.168.10.15:8080/"
-
-  //var SERVER_URL = "https://magdemo.timecam.tv/"
-
-  //var IMG_BASE_URL = "https://magdemo.timecam.tv/"
-
-
-
-
-
-  //var BASE_URL = SERVER_URL + "magnoliaPublic/"
-
-
-  //.rest/delivery/stories/v1/stories-demo/lost-and-found-in-swiss-alps
-
-var Y = 1.6;
-var HEIGHT = 2;
-var WIDTH = 3;
-//Y=0;
-
- const aSpace = [
+const aWallLayout = [
    {
      pos:{   x:-3,  y:Y,   z:0},
      rot:{   x: 0,    y:180, z:0},
@@ -108,39 +86,45 @@ var WIDTH = 3;
      height: HEIGHT
    },
 
-
- ]
-
-console.log("get data:" + CONTENT_URL)
-axios.get(CONTENT_URL)
-  .then(function (response) {
-    // handle success
-    console.log(response);
-    buildStoryScene(response.data.results);
-  })
-  .catch(function (error) {
-    // handle error
-    console.log(error);
-  })
-  .then(function () {
-    // always executed
-  });
+ ];
 
 
+ window.onload = function() {
+   loadStory();
+ };
 
-AFRAME.registerComponent('do-something-once-loaded', {
-  init: function () {
-    // This will be called after the entity has properly attached and loaded.
-    console.log('I am ready!');
-  }
-});
+ function loadStory(){
 
-var STORY_INDEX = 0;
+   //You can pass the path for a story in with an 's' parameter.
+   // ?s=/stories-demo/flavors-of-asia
+
+   var urlParams = new URLSearchParams(window.location.search);
+   if (urlParams.has('s')){
+     STORY_PATH = urlParams.get('s');
+   }else{
+     STORY_PATH = DEFAULT_STORY;
+   }
+   CONTENT_URL_FULL = CONTENT_URL + STORY_PATH
+
+  console.log("get data:" + CONTENT_URL_FULL)
+
+  axios.get(CONTENT_URL_FULL)
+    .then(function (response) {
+      console.log(response);
+      buildStoryScene(response.data);
+    })
+    .catch(function (error) {
+      console.log(error);
+    })
+    .then(function () {
+      // always executed
+    });
+ }
+
 
 function buildScene(){
   var sceneEl = document.querySelector('a-scene');
   var entityEl = document.createElement('a-entity');
-  entityEl.setAttribute('do-something-once-loaded', '');
   sceneEl.appendChild(entityEl);
 }
 
@@ -150,19 +134,19 @@ function htmlToText(html){
   return div.innerText;
 }
 
-function buildStoryScene(stories){
+function buildStoryScene(story){
   var sceneEl = document.querySelector('a-scene');
 
-  renderTitle(stories[STORY_INDEX].title, sceneEl);
-  renderIntro(stories[STORY_INDEX], sceneEl);
-  renderAuthor(stories[STORY_INDEX], sceneEl);
+  renderTitle(story.title, sceneEl);
+  renderIntro(story, sceneEl);
+  renderAuthor(story, sceneEl);
 
-  var nodes = stories[STORY_INDEX]['@nodes']
+  var nodes = story['@nodes']
   var z = 0;
   var index = 0;
 
   nodes.forEach(function(nodeName) {
-    var block = stories[STORY_INDEX][nodeName];
+    var block = story[nodeName];
 
     var validItem = renderStoryItem(block, z, sceneEl, index)
     if (validItem){
@@ -191,9 +175,8 @@ function renderStoryItem(block, z, sceneEl, index){
 
   var entityEl = document.createElement('a-entity');
 
-  entityEl.setAttribute('do-something-once-loaded', '');
-  var s = aSpace[(index % aSpace.length)];
-  var z = s.pos.z - Math.floor(index / aSpace.length) * 6;
+  var s = aWallLayout[(index % aWallLayout.length)];
+  var z = s.pos.z - Math.floor(index / aWallLayout.length) * 6;
 
   entityEl.setAttribute('position', {x: s.pos.x, y: s.pos.y, z: z});
   entityEl.setAttribute('rotation', {x: s.rot.x, y: s.rot.y, z: s.rot.z});
@@ -213,10 +196,6 @@ function renderStoryItem(block, z, sceneEl, index){
     }else if (type === 'tour'){
 
       buildTour(s, z, block, entityEl);
-    //
-    // }else if (type === 'video'){
-    //
-    //   buildVideo(s, z, block, entityEl);
 
     }else{
       console.log('index:' + index + 'item type not supported:' + type);
@@ -224,9 +203,7 @@ function renderStoryItem(block, z, sceneEl, index){
     }
 
     sceneEl.appendChild(entityEl);
-
     return true;
-
 }
 
 function setGeoPlane(entityEl, s){
@@ -237,23 +214,6 @@ function setGeoPlane(entityEl, s){
   });
 
 }
-
-
-function buildVideo(s, z, block, entityEl){
-
-  setGeoPlane(entityEl, s);
-  //VIMEO REQUIRES A SERVER - So we wont support it now.
-  var embed_url = block.embed;
-  embed_url = embed_url.slice('"')[2];
-  // console.log('img: ' + embed_url);
-  entityEl.setAttribute('material', {
-    shader: 'flat',
-    side: 'double',
-    src : "//localhost:8080/magnoliaPublic/.resources/vr-stories/webresources/demo-stories-zermatt_time-lapse-spiti-valley.mp4"
-  });
-  console.log('video:' + embed_url);
-}
-
 
 function buildText(s, z, block, entityEl){
 
@@ -294,28 +254,98 @@ function buildDate(s, z, block, entityEl){
 }
 
 
+function centerImage(frame_w, frame_h, w, h, entityEl){
+  var frame_ratio = frame_w/frame_h;
+  var ratio = w/h;
+  var final_w, final_h;
+
+  if (ratio > frame_ratio){
+    //wide
+    final_w = frame_w;
+    final_h = frame_w / ratio;
+  }else{
+    //narrow
+    final_h = frame_h;
+    final_w = frame_h * ratio;
+  }
+
+  entityEl.setAttribute('geometry', {
+    primitive: 'plane',
+    width: final_w,
+    height: final_h
+  });
+}
+
+//Create Asset (so that CORS works)
+function createAsset(assetID, url){
+  var assetBucket = document.querySelector("a-assets");
+  var asset = document.createElement('img');
+
+  asset.setAttribute('id', assetID);
+  asset.setAttribute('crossorigin', 'anonymous');
+  asset.setAttribute('src', url);
+  assetBucket.appendChild(asset);
+}
+
 function buildImage(s, z, block, entityEl){
 
+  // first, add a black background:
   setGeoPlane(entityEl, s);
-
-  var IMG_URL;
-  var img_url = block['image']['renditions']['960']['link'];
-  console.log('img: ' + img_url);
-  IMG_URL = IMG_BASE_URL + img_url;
-
   entityEl.setAttribute('material', {
     shader: 'flat',
     side: 'double',
-    src : IMG_URL
+    color : '#000000'
   });
-  entityEl.setAttribute('crossorigin', 'Anonymous');
+
+  // then add the image.
+  var imageEl = document.createElement('a-entity');
+  var w = block['image']['metadata']['width'];
+  var h = block['image']['metadata']['height'];
+  centerImage(s.width, s.height, w, h, imageEl)
+
+  var img_url = block['image']['renditions']['960']['link'];
+  console.log('img: ' + img_url);
+  img_url = IMG_BASE_URL + img_url;
+
+  var assetID = block['@id'];
+  createAsset(assetID, img_url);
+
+  imageEl.setAttribute('material', {
+    shader: 'flat',
+    side: 'double',
+    src : '#' + assetID
+  });
+  imageEl.setAttribute('position', {x: 0, y: 0, z: 0.01});
+
+  entityEl.appendChild(imageEl);
   console.log('image:' + img_url);
 }
+
+// function buildImageBasic(s, z, block, entityEl){
+//
+//   setGeoPlane(entityEl, s);
+//
+//   var img_url = block['image']['renditions']['960']['link'];
+//   console.log('img: ' + img_url);
+//   img_url = IMG_BASE_URL + img_url;
+//
+//   entityEl.setAttribute('material', {
+//     shader: 'flat',
+//     side: 'double',
+//     src : img_url
+//   });
+//   entityEl.setAttribute('crossorigin', 'Anonymous');
+//   console.log('image:' + img_url);
+// }
 
 
 function buildTour(s, z, block, entityEl){
 
-  var img_url = BASE_URL + ".resources/vr-stories/webresources/PANO_scott-wood-grand-teton.jpg"
+  var img_url = "assets/PHOTOSPHERE_scott-wood-grand-teton.jpg"
+
+  var assetID = block['@id'];
+  createAsset(assetID, img_url);
+
   entityEl.setAttribute('geometry', {
     primitive: 'sphere',
     height: 1.5,
@@ -426,6 +456,7 @@ function renderIntro(story, sceneEl){
   sceneEl.appendChild(entityEl);
 }
 
+
 function renderAuthor(story, sceneEl){
 
   var text = story.author + '\n\n\n' + story.authorBio;
@@ -446,33 +477,23 @@ function renderAuthor(story, sceneEl){
   sceneEl.appendChild(entityEl);
 }
 
-
-
-
   </script>
 
-  <meta charset="utf-8">
 </head>
 
 <body>
   <a-scene background="color: #444">
 
-    <a-plane id="floor" rotation="-90 0 0" position="0 0.6 -17" color="#222" height="40" width="9"></a-plane>
-
-
     <a-assets>
-      <a-mixin id="marker" geometry="primitive: plane; width: 0.02; height: 0.02" material="color: red"></a-mixin>
 
-      <img id="test" crossorigin="anonymous" src="https://magdemo.timecam.tv//magnoliaPublic/.imaging/mte/travel-demo-theme/960/dam/stories-demo/found-in-switzerland/martin-sattler-120937/jcr:content/martin-sattler-120937.jpg">
-
-      <img id="test2" crossorigin="anonymous" src="https://magdemo.timecam.tv///magnoliaPublic/.imaging/mte/travel-demo-theme/960/dam/stories-demo/found-in-switzerland/hiker-joshua-earle-234844/jcr:content/hiker-joshua-earle-234844.jpg">
     </a-assets>
 
-    <a-entity mixin="marker" position="0.0 0.0 +0.01"></a-entity>
+    <a-plane id="floor" rotation="-90 0 0" position="0 0.6 -17" color="#222" height="40" width="9"></a-plane>
 
-    <a-entity position="0.0 0 -0.1"
-      text="width: 0.1; color: white; side:double; value: START.; ">
+    <a-entity position="2 2 1"
+      text="width: 4; color: white; side:double; value: START; ">
     </a-entity>
+
 
     <a-entity id="rig"
               movement-controls
@@ -492,7 +513,7 @@ function renderAuthor(story, sceneEl){
     </a-entity>
 
   </a-scene>
-  <img src="https://public-integration-magnolia-pm.de.magnolia-cloud.com/.imaging/default/dam/stories-demo/flying-grand-canyon/derek-owens-284620/jcr:content.jpg"/>
+
 </body>
 
 </html>
