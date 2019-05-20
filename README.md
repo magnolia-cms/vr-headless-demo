@@ -9,6 +9,8 @@ Uses A-FRAME (https://aframe.io/) to create a VR experience with content from th
 
 Different block types from the story will be rendered as different 3D elements. In this version, the story is presented as if it were a museum installation.
 
+![vr-stories](_dev/README-vr-stories.jpg)
+
 On a desktop computer, you can use the arrow keys to move through the environment.
 
 Click on the glasses icon in the lower right corner to enter full VR mode.
