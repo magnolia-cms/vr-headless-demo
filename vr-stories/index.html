@@ -12,7 +12,7 @@ font-src * data: blob: 'unsafe-inline';"/>
 
   <meta charset="utf-8"/>
 
-  <script src="//aframe.io/releases/0.9.0/aframe.min.js"></script>
+  <script src="assets/aframe-0.9.1-chromefix.js"></script>
   <script src="//unpkg.com/axios/dist/axios.min.js"></script>
   <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v6.0.0/dist/aframe-extras.controls.min.js"></script>
 
@@ -22,7 +22,7 @@ font-src * data: blob: 'unsafe-inline';"/>
 
 const SERVER_URL = "http://localhost:8080/"
 const IMG_BASE_URL = "http://localhost:8080/"
-const BASE_URL = SERVER_URL + "magnoliaPublic/"
+const BASE_URL = SERVER_URL + "magnoliaAuthor/"
 
 
 //Running on demopublic - But does not work because CORS and the restEndpoint are configured differently on that server currently.
@@ -143,22 +143,20 @@ function buildStoryScene(story){
   renderAuthor(story, sceneEl);
 
   var nodes = story['@nodes']
-  var z = 0;
   var index = 0;
 
   nodes.forEach(function(nodeName) {
     var block = story[nodeName];
 
-    var validItem = renderStoryItem(block, z, sceneEl, index)
+    var validItem = renderStoryItem(block, sceneEl, index)
     if (validItem){
-      z -= 1;
       index += 1;
     }
 
   });
 }
 
-function renderStoryItem(block, z, sceneEl, index){
+function renderStoryItem(block, sceneEl, index){
 
   var type = block['mgnl:type'];
 
@@ -174,19 +172,19 @@ function renderStoryItem(block, z, sceneEl, index){
 
   if (type == 'text'){
 
-      buildText(s, z, block, entityEl);
+      buildText(s, block, entityEl);
 
     } else if (type === 'image'){
 
-      buildImage(s, z, block, entityEl);
+      buildImage(s,block, entityEl);
 
     }else  if (type === 'date'){
 
-      buildDate(s, z, block, entityEl);
+      buildDate(s, block, entityEl);
 
     }else if (type === 'tour'){
 
-      buildTour(s, z, block, entityEl);
+      buildTour(s, block, entityEl);
 
     }else{
       console.log('index:' + index + 'item type not supported:' + type);
@@ -206,7 +204,7 @@ function setGeoPlane(entityEl, s){
 
 }
 
-function buildText(s, z, block, entityEl){
+function buildText(s, block, entityEl){
 
   setGeoPlane(entityEl, s);
 
@@ -227,7 +225,7 @@ function buildText(s, z, block, entityEl){
 }
 
 
-function buildDate(s, z, block, entityEl){
+function buildDate(s, block, entityEl){
 
   setGeoPlane(entityEl, s);
   var date = htmlToText(block['date']);
@@ -278,7 +276,7 @@ function createAsset(assetID, url){
   assetBucket.appendChild(asset);
 }
 
-function buildImage(s, z, block, entityEl){
+function buildImage(s, block, entityEl){
 
   // first, add a black background:
   setGeoPlane(entityEl, s);
@@ -330,7 +328,7 @@ function buildImage(s, z, block, entityEl){
 // }
 
 
-function buildTour(s, z, block, entityEl){
+function buildTour(s, block, entityEl){
 
   var img_url = "assets/PHOTOSPHERE_scott-wood-grand-teton.jpg"
 

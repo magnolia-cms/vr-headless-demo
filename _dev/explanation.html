@@ -1,0 +1,132 @@
+<html>
+
+<head>
+
+  <script src="assets/aframe-0.9.1-chromefix.js"></script>
+  <script src="//unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v6.0.0/dist/aframe-extras.controls.min.js"></script>
+
+<script>
+
+/**
+This is the geometry of the museum exhibit.
+It is repeated for as long as there are blocks in the story.
+*/
+const aWallLayout = [
+   {
+     pos:{   x:-3,  y:Y,   z:0},
+     rot:{   x: 0,    y:180, z:0},
+     width: WIDTH,
+     height: HEIGHT
+   },
+   {
+     pos:{   x:-4.5,  y:Y,   z:-1.5},
+     rot:{   x:0,     y:90,  z:0},
+     width: WIDTH,
+     height: HEIGHT
+   },
+   {
+     pos:{   x:-3,  y:Y,   z:-3},
+     rot:{   x:0,     y:0,  z:0},
+     width: WIDTH,
+     height: HEIGHT
+   },
+...
+ ];
+
+
+ window.onload = function() {
+   loadStory();
+ };
+
+/**
+Load the story from the REST endpoint.
+*/
+ function loadStory(){
+...
+  axios.get(CONTENT_URL_FULL)
+    .then(function (response) {
+      console.log(response);
+      buildStoryScene(response.data);
+    })
+...
+ }
+
+function buildStoryScene(story){
+  var sceneEl = document.querySelector('a-scene');
+...
+  var nodes = story['@nodes']
+  var index = 0;
+
+  nodes.forEach(function(nodeName) {
+    var block = story[nodeName];
+
+    var validItem = renderStoryItem(block, sceneEl, index)
+    if (validItem){
+      index += 1;
+    }
+
+  });
+}
+
+function renderStoryItem(block, sceneEl, index){
+
+  var type = block['mgnl:type'];
+
+  var entityEl = document.createElement('a-entity');
+
+  var s = aWallLayout[(index % aWallLayout.length)];
+  var z = s.pos.z - Math.floor(index / aWallLayout.length) * 6;
+
+  entityEl.setAttribute('position', {x: s.pos.x, y: s.pos.y, z: z});
+  entityEl.setAttribute('rotation', {x: s.rot.x, y: s.rot.y, z: s.rot.z});
+
+  if (type == 'text'){
+
+      buildText(s, block, entityEl);
+
+    } else if (type === 'image'){
+
+      buildImage(s,block, entityEl);
+...
+    }else{
+      console.log('index:' + index + 'item type not supported:' + type);
+      return false;
+    }
+
+    sceneEl.appendChild(entityEl);
+    return true;
+}
+
+function buildText(s, block, entityEl){
+
+  setGeoPlane(entityEl, s);
+
+  var text = htmlToText(block['text']);
+
+  entityEl.setAttribute('text', "side: front; color: white; value: " + text);
+
+  entityEl.setAttribute('material', {
+    color: "#111",
+    side: 'double',
+    shader: 'flat'
+  });
+}
+
+  </script>
+
+</head>
+
+<body>
+  <a-scene background="color: #444">
+
+    <a-assets></a-assets>
+
+    <a-plane id="floor" rotation="-90 0 0" position="0 0.6 -17" color="#222" height="40" width="9"></a-plane>
+...
+
+  </a-scene>
+
+</body>
+
+</html>
