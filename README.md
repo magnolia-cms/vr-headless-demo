@@ -9,6 +9,10 @@ Uses A-FRAME (https://aframe.io/) to create a VR experience with content from th
 
 Different block types from the story will be rendered as different 3D elements. In this version, the story is presented as if it were a museum installation.
 
+On a desktop computer, you can use the arrow keys to move through the environment.
+
+Click on the glasses icon in the lower right corner to enter full VR mode.
+
 Tested on desktop Chrome & Firefox, mobile Chrome & Firefox, and Oculus browser on the Oculus Go.
 
 Uses the delivery endpoint: https://documentation.magnolia-cms.com/display/DOCS57/Delivery+endpoint+API
@@ -21,7 +25,7 @@ The files in the `vr-stories` directory are the full VR experience which can be 
 
 The `vr-stories-lm` directory is a Magnolia `Light Module` which provisions the REST endpoint
 that the VR client expects.
-To use it on your own Magnolia instance, just drop `vr-stories-lm` into your resources directory - usually named `modules` or `light-modules`. 
+To use it on your own Magnolia instance, just drop `vr-stories-lm` into your resources directory - usually named `modules` or `light-modules`.
 
 ### CORS
 
@@ -35,7 +39,7 @@ addCORSHeaders
       pattern: ^\/(\.imaging|\.rest|dam)\/(.*)
 
 ```
-Otherwise you can use the `Import` action to import the '_dev/cors/addCORSHeaders.xml' configuration bootstrap file from this repository. Be sure to place the filter directly after the `server/filters/uriSecurity` filter.
+Otherwise you can use the `Import` action to import the `_dev/cors/config.server.filters.addCORSHeaders.xml` configuration bootstrap file from this repository. Be sure to place the filter directly after the `server/filters/uriSecurity` filter.
 
 ### Sample Content and s parameter
 

@@ -22,10 +22,17 @@ font-src * data: blob: 'unsafe-inline';"/>
 
 const SERVER_URL = "http://localhost:8080/"
 const IMG_BASE_URL = "http://localhost:8080/"
-
-
-
 const BASE_URL = SERVER_URL + "magnoliaPublic/"
+
+
+//Running on demopublic - But does not work because CORS and the restEndpoint are configured differently on that server currently.
+
+// const SERVER_URL = "https://demopublic.magnolia-cms.com/"
+// const IMG_BASE_URL = "https://demopublic.magnolia-cms.com/"
+// const BASE_URL = SERVER_URL + ""
+
+
+
 const CONTENT_URL = BASE_URL + ".rest/delivery/storiesFull/v1/";
 
 const DEFAULT_STORY = "stories-demo/lost-and-found-in-swiss-alps";
@@ -34,6 +41,10 @@ const Y = 1.6;
 const HEIGHT = 2;
 const WIDTH = 3;
 
+/**
+This is the geometry of the museum exhibit.
+It is repeated for as long as there are blocks in the story.
+*/
 const aWallLayout = [
    {
      pos:{   x:-3,  y:Y,   z:0},
@@ -93,6 +104,9 @@ const aWallLayout = [
    loadStory();
  };
 
+/**
+Load the story from the REST endpoint.
+*/
  function loadStory(){
 
    //You can pass the path for a story in with an 's' parameter.
@@ -121,19 +135,6 @@ const aWallLayout = [
     });
  }
 
-
-function buildScene(){
-  var sceneEl = document.querySelector('a-scene');
-  var entityEl = document.createElement('a-entity');
-  sceneEl.appendChild(entityEl);
-}
-
-function htmlToText(html){
-  var div = document.createElement("div");
-  div.innerHTML = html;
-  return div.innerText;
-}
-
 function buildStoryScene(story){
   var sceneEl = document.querySelector('a-scene');
 
@@ -156,16 +157,6 @@ function buildStoryScene(story){
 
   });
 }
-
-function pad(m){
-
-  if (m.toString().length < 2){
-    return "0" + m;
-  }else {
-    return m;
-  }
-}
-
 
 function renderStoryItem(block, z, sceneEl, index){
 
@@ -477,6 +468,24 @@ function renderAuthor(story, sceneEl){
   sceneEl.appendChild(entityEl);
 }
 
+
+function pad(m){
+  if (m.toString().length < 2){
+    return "0" + m;
+  }else {
+    return m;
+  }
+}
+
+
+
+function htmlToText(html){
+  var div = document.createElement("div");
+  div.innerHTML = html;
+  return div.innerText;
+}
+
+
   </script>
 
 </head>
@@ -490,7 +499,7 @@ function renderAuthor(story, sceneEl){
 
     <a-plane id="floor" rotation="-90 0 0" position="0 0.6 -17" color="#222" height="40" width="9"></a-plane>
 
-    <a-entity position="2 2 1"
+    <a-entity position="2 2 5"
       text="width: 4; color: white; side:double; value: START; ">
     </a-entity>
 
