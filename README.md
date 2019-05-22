@@ -11,11 +11,13 @@ Different block types from the story will be rendered as different 3D elements. 
 
 ![vr-stories](_dev/README-vr-stories.jpg)
 
+You can see a live example of this demo here: https://blog.magnolia-cms.com/vr-blog.html
+
 On a desktop computer, you can use the arrow keys to move through the environment.
 
 Click on the glasses icon in the lower right corner to enter full VR mode.
 
-Tested on desktop Chrome & Firefox, mobile Chrome & Firefox, and Oculus browser on the Oculus Go.
+Tested on desktop Safari, Chrome & Firefox, mobile Chrome & Firefox, and Oculus browser on the Oculus Go & Oculus Quest.
 
 Uses the delivery endpoint: https://documentation.magnolia-cms.com/display/DOCS57/Delivery+endpoint+API
 
